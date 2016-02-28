@@ -31,6 +31,7 @@ public class sphere_motion : MonoBehaviour {
 		{
 			if(sphere_move)
 			{
+				offset = Input.mousePosition - Camera.main.WorldToScreenPoint(transform.position);
 				Vector3 mouse=Input.mousePosition;
 				mouse -= offset;
 				mouse.z = Camera.main.WorldToScreenPoint (transform.position).z;
