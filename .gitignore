@@ -24,3 +24,12 @@ ExportedObj/
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
+
+# FSharp files to ignore
+
+*.swp
+*.swo
+*.pyc
+paket.exe
+ftplugin/bin/
+packages/
