@@ -4,6 +4,10 @@ open UnityEngine
 type SphereMotion() =
     inherit MonoBehaviour()
 
+    let mutable offset:Vector3 = new Vector3();
+    let mutable pressed = false
+    let mutable sphereShouldMove = false
+
     let shouldSphereMove (mousePos:Vector3) (transformPos:Vector3) : bool =
         mousePos
         |> ( fun pos -> Camera.main.ScreenPointToRay pos )
@@ -11,23 +15,29 @@ type SphereMotion() =
         |> ( fun crossProduct -> crossProduct.magnitude )
         |> ( fun mag -> mag < 2.5f )
 
-    let sphereScreenPointFromMouse (mousePos:Vector3) (transformPos:Vector3) : Vector3 =
-        let transformScreenPoint = Camera.main.WorldToScreenPoint(transformPos)
+    let sphereWorldPoint (mousePos:Vector3) (transformPos:Vector3) (offset:Vector3) : Vector3 =
+        let tsp = Camera.main.WorldToScreenPoint(transformPos)
 
-        transformScreenPoint
-        |> ( fun sp -> mousePos - sp )
-        |> ( fun offset -> mousePos - offset )
-        |> ( fun offsetMousePos -> new Vector3(offsetMousePos.x, offsetMousePos.y, transformScreenPoint.z) )
-        |> ( fun spherePos ->
-                Camera.main.WorldToScreenPoint spherePos )
+        mousePos
+        |> ( fun mp -> mp - offset )
+        |> ( fun offsetted -> new Vector3(offsetted.x, offsetted.y, tsp.z) )
+        |> ( fun newPos -> Camera.main.ScreenToWorldPoint(newPos) )
 
     member this.Update() =
-        match Input.GetMouseButton(0) with
+        if Input.GetMouseButtonDown(0) then
+            pressed          <- true
+            sphereShouldMove <- shouldSphereMove Input.mousePosition this.transform.position
+            offset           <- Input.mousePosition - Camera.main.WorldToScreenPoint(this.transform.position)
+        else ()
+
+        if Input.GetMouseButtonUp(0) then
+            pressed <- false
+        else ()
+
+        match pressed with
         | true ->
-            let sphereShouldMove = shouldSphereMove Input.mousePosition this.transform.position
             match sphereShouldMove with 
-            | true ->
-                this.transform.position <- sphereScreenPointFromMouse Input.mousePosition this.transform.position
+            | true -> this.transform.position <- sphereWorldPoint Input.mousePosition this.transform.position offset
             | false ->
                 let h:float32 = 2.0f * Input.GetAxis("Mouse X")
                 Camera.main.transform.RotateAround(new Vector3(0.0f, 0.0f, 0.0f), Vector3.up, h)
