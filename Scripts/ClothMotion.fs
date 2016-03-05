@@ -1,5 +1,6 @@
 ﻿namespace ClothMotion
 open UnityEngine
+open Util
 
 type Edge = 
     { Vertex1: int;
@@ -16,3 +17,9 @@ type ClothMotion() =
     let damping = 0.99f
     let stiffness = 1000.0f
 
+    member this.Start() =
+        let mesh = this.GetComponent<MeshFilter>().mesh
+        let triangles = mesh.triangles
+        let vertices = mesh.vertices
+
+        ()
